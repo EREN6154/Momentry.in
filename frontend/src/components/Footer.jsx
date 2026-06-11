@@ -93,10 +93,10 @@ export default function Footer() {
               <div className="flex items-center gap-3">
                 <FaPhone className="text-champagne flex-shrink-0" />
                 <a
-                  href="tel:+91-XXXXXXXXXX"
+                  href="tel:+91-7878103486"
                   className="hover:text-champagne transition break-all"
                 >
-                  +91-XXXXXXXXXX
+                  +91-7878103486
                 </a>
               </div>
               <div className="flex items-center gap-3">

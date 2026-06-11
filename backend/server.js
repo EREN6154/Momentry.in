@@ -45,178 +45,182 @@ const initializeData = async () => {
       console.log("✅ Admin user created");
     }
 
-    // Create sample packages - delete and recreate on each start
-    await Package.deleteMany({});
-    const samplePackages = [
-      {
-        title: "Triund Trek - Mountain Paradise",
-        destination: "Himachal Pradesh",
-        price: 6999,
-        duration: 2,
-        maxParticipants: 20,
-        description:
-          "Experience the magical sunrise at Triund with breathtaking Himalayan views and pristine nature.",
-        image:
-          "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
-        highlights: [
-          "Mountain Trek",
-          "Sunrise View",
-          "Local Tea",
-          "Photography",
-        ],
-        isActive: true,
-      },
-      {
-        title: "Kasol - Backpackers' Haven",
-        destination: "Himachal Pradesh",
-        price: 5999,
-        duration: 3,
-        maxParticipants: 25,
-        description:
-          "Discover the bohemian vibes of Kasol with scenic riverside trails and vibrant culture.",
-        image:
-          "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&h=300&fit=crop",
-        highlights: ["River Trails", "Local Cafes", "Adventure", "Culture"],
-        isActive: true,
-      },
-      {
-        title: "Tungnath - Sacred Heights",
-        destination: "Uttarakhand",
-        price: 8999,
-        duration: 3,
-        maxParticipants: 15,
-        description:
-          "Trek to the world's highest Shiva temple at Tungnath with pristine alpine meadows.",
-        image:
-          "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
-        highlights: ["Temple Trek", "Alpine Meadows", "Spiritual", "Adventure"],
-        isActive: true,
-      },
-      {
-        title: "Kedarnath Pilgrimage",
-        destination: "Uttarakhand",
-        price: 12999,
-        duration: 4,
-        maxParticipants: 20,
-        description:
-          "Sacred journey to Kedarnath with stunning mountain views and spiritual experiences.",
-        image:
-          "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
-        highlights: [
-          "Sacred Temple",
-          "Mandakini River",
-          "Mountain Views",
-          "Spiritual",
-        ],
-        isActive: true,
-      },
-      {
-        title: "Shimla - Hill Station Classic",
-        destination: "Himachal Pradesh",
-        price: 7999,
-        duration: 3,
-        maxParticipants: 30,
-        description:
-          "Explore the charming colonial hill station of Shimla with mall roads and scenic landscapes.",
-        image:
-          "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
-        highlights: [
-          "Mall Road",
-          "Historic Sites",
-          "Scenic Views",
-          "Toy Train",
-        ],
-        isActive: true,
-      },
-      {
-        title: "Spiti Valley - Hidden Gem",
-        destination: "Himachal Pradesh",
-        price: 16999,
-        duration: 6,
-        maxParticipants: 12,
-        description:
-          "Journey through the mystical Spiti Valley with ancient monasteries and surreal landscapes.",
-        image:
-          "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
-        highlights: [
-          "Monasteries",
-          "Scenic Drives",
-          "Local Culture",
-          "Adventure",
-        ],
-        isActive: true,
-      },
-      {
-        title: "Manali - Adventure Capital",
-        destination: "Himachal Pradesh",
-        price: 9999,
-        duration: 5,
-        maxParticipants: 18,
-        description:
-          "Adventure activities in Manali including paragliding, river rafting, and trekking.",
-        image:
-          "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&h=300&fit=crop",
-        highlights: [
-          "Paragliding",
-          "River Rafting",
-          "Trekking",
-          "Scenic Views",
-        ],
-        isActive: true,
-      },
-      {
-        title: "Jaipur - The Pink City",
-        destination: "Rajasthan",
-        price: 5999,
-        duration: 3,
-        maxParticipants: 30,
-        description:
-          "Explore the iconic pink city of Jaipur with magnificent forts and palaces.",
-        image:
-          "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&h=300&fit=crop",
-        highlights: ["City Palace", "Hawa Mahal", "Local Markets", "Heritage"],
-        isActive: true,
-      },
-      {
-        title: "Udaipur - Venice of India",
-        destination: "Rajasthan",
-        price: 11999,
-        duration: 4,
-        maxParticipants: 25,
-        description:
-          "Experience the romantic beauty of Udaipur with palace lakes and royal architecture.",
-        image:
-          "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&h=300&fit=crop",
-        highlights: [
-          "City Palace",
-          "Lake Pichola",
-          "Boat Cruise",
-          "Royal Experience",
-        ],
-        isActive: true,
-      },
-      {
-        title: "Goa Beach Paradise",
-        destination: "Goa",
-        price: 8999,
-        duration: 5,
-        maxParticipants: 20,
-        description:
-          "Experience the vibrant culture of Goa with beautiful beaches, water sports, and amazing nightlife.",
-        image:
-          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&h=300&fit=crop",
-        highlights: [
-          "Beach Resort",
-          "Water Sports",
-          "Nightlife",
-          "Local Cuisine",
-        ],
-        isActive: true,
-      },
-    ];
+    // Create sample packages - only if database is empty
+    const packagesCount = await Package.countDocuments();
+    if (packagesCount === 0) {
+      const samplePackages = [
+        {
+          title: "Triund Trek - Mountain Paradise",
+          destination: "Himachal Pradesh",
+          price: 6999,
+          duration: 2,
+          maxParticipants: 20,
+          description:
+            "Experience the magical sunrise at Triund with breathtaking Himalayan views and pristine nature.",
+          image:
+            "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
+          highlights: [
+            "Mountain Trek",
+            "Sunrise View",
+            "Local Tea",
+            "Photography",
+          ],
+          isActive: true,
+        },
+        {
+          title: "Kasol - Backpackers' Haven",
+          destination: "Himachal Pradesh",
+          price: 5999,
+          duration: 3,
+          maxParticipants: 25,
+          description:
+            "Discover the bohemian vibes of Kasol with scenic riverside trails and vibrant culture.",
+          image:
+            "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&h=300&fit=crop",
+          highlights: ["River Trails", "Local Cafes", "Adventure", "Culture"],
+          isActive: true,
+        },
+        {
+          title: "Tungnath - Sacred Heights",
+          destination: "Uttarakhand",
+          price: 8999,
+          duration: 3,
+          maxParticipants: 15,
+          description:
+            "Trek to the world's highest Shiva temple at Tungnath with pristine alpine meadows.",
+          image:
+            "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
+          highlights: ["Temple Trek", "Alpine Meadows", "Spiritual", "Adventure"],
+          isActive: true,
+        },
+        {
+          title: "Kedarnath Pilgrimage",
+          destination: "Uttarakhand",
+          price: 12999,
+          duration: 4,
+          maxParticipants: 20,
+          description:
+            "Sacred journey to Kedarnath with stunning mountain views and spiritual experiences.",
+          image:
+            "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
+          highlights: [
+            "Sacred Temple",
+            "Mandakini River",
+            "Mountain Views",
+            "Spiritual",
+          ],
+          isActive: true,
+        },
+        {
+          title: "Shimla - Hill Station Classic",
+          destination: "Himachal Pradesh",
+          price: 7999,
+          duration: 3,
+          maxParticipants: 30,
+          description:
+            "Explore the charming colonial hill station of Shimla with mall roads and scenic landscapes.",
+          image:
+            "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
+          highlights: [
+            "Mall Road",
+            "Historic Sites",
+            "Scenic Views",
+            "Toy Train",
+          ],
+          isActive: true,
+        },
+        {
+          title: "Spiti Valley - Hidden Gem",
+          destination: "Himachal Pradesh",
+          price: 16999,
+          duration: 6,
+          maxParticipants: 12,
+          description:
+            "Journey through the mystical Spiti Valley with ancient monasteries and surreal landscapes.",
+          image:
+            "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
+          highlights: [
+            "Monasteries",
+            "Scenic Drives",
+            "Local Culture",
+            "Adventure",
+          ],
+          isActive: true,
+        },
+        {
+          title: "Manali - Adventure Capital",
+          destination: "Himachal Pradesh",
+          price: 9999,
+          duration: 5,
+          maxParticipants: 18,
+          description:
+            "Adventure activities in Manali including paragliding, river rafting, and trekking.",
+          image:
+            "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&h=300&fit=crop",
+          highlights: [
+            "Paragliding",
+            "River Rafting",
+            "Trekking",
+            "Scenic Views",
+          ],
+          isActive: true,
+        },
+        {
+          title: "Jaipur - The Pink City",
+          destination: "Rajasthan",
+          price: 5999,
+          duration: 3,
+          maxParticipants: 30,
+          description:
+            "Explore the iconic pink city of Jaipur with magnificent forts and palaces.",
+          image:
+            "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&h=300&fit=crop",
+          highlights: ["City Palace", "Hawa Mahal", "Local Markets", "Heritage"],
+          isActive: true,
+        },
+        {
+          title: "Udaipur - Venice of India",
+          destination: "Rajasthan",
+          price: 11999,
+          duration: 4,
+          maxParticipants: 25,
+          description:
+            "Experience the romantic beauty of Udaipur with palace lakes and royal architecture.",
+          image:
+            "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&h=300&fit=crop",
+          highlights: [
+            "City Palace",
+            "Lake Pichola",
+            "Boat Cruise",
+            "Royal Experience",
+          ],
+          isActive: true,
+        },
+        {
+          title: "Goa Beach Paradise",
+          destination: "Goa",
+          price: 8999,
+          duration: 5,
+          maxParticipants: 20,
+          description:
+            "Experience the vibrant culture of Goa with beautiful beaches, water sports, and amazing nightlife.",
+          image:
+            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&h=300&fit=crop",
+          highlights: [
+            "Beach Resort",
+            "Water Sports",
+            "Nightlife",
+            "Local Cuisine",
+          ],
+          isActive: true,
+        },
+      ];
 
-    await Package.insertMany(samplePackages);
-    console.log("✅ Sample packages created");
+      await Package.insertMany(samplePackages);
+      console.log("✅ Sample packages created");
+    } else {
+      console.log("✅ Packages already exist in database, skipping sample creation");
+    }
   } catch (error) {
     console.error("Error initializing data:", error);
   }

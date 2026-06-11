@@ -56,7 +56,8 @@ export const useAuthStore = create((set) => ({
       const { user, token } = response.data;
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
-      set({ user, token, isAdmin: false });
+      localStorage.setItem("isAdmin", user.isAdmin);
+      set({ user, token, isAdmin: user.isAdmin });
       return { success: true, user };
     } catch (error) {
       return {
@@ -184,6 +185,7 @@ export const usePackageStore = create((set, get) => ({
 export const useBookingStore = create((set) => ({
   bookings: [],
   currentBooking: null,
+  adminStats: null,
 
   createBooking: async (packageId, quantity) => {
     try {
@@ -212,6 +214,19 @@ export const useBookingStore = create((set) => ({
       return response.data;
     } catch (error) {
       console.error("Failed to fetch bookings:", error);
+    }
+  },
+
+  fetchAdminStats: async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${API_URL}/bookings/admin/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      set({ adminStats: response.data });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch admin stats:", error);
     }
   },
 }));

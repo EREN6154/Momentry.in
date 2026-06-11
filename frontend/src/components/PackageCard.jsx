@@ -1,83 +1,94 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FiMapPin, FiClock, FiUsers, FiArrowRight } from "react-icons/fi";
+import { FiStar, FiMapPin, FiCalendar } from "react-icons/fi";
 
 export default function PackageCard({ pkg }) {
+  const rating = pkg.rating || 4.8;
+
+  // Stable badge: based on the package ID, so it never flickers.
+  // Later you can replace this with a real field like pkg.badge from your database.
+  const badgeOptions = ["BEST SELLER", "EARLY BIRD"];
+  const badgeIndex = pkg._id
+    ? pkg._id.charCodeAt(pkg._id.length - 1) % badgeOptions.length
+    : 0;
+  const badge = badgeOptions[badgeIndex];
+  const isOlive = badge === "EARLY BIRD";
+
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition overflow-hidden group h-full">
-      {/* Image */}
-      <div className="relative h-40 sm:h-48 overflow-hidden bg-gray-200">
-        <img
-          src={
-            pkg.image ||
-            "https://via.placeholder.com/400x300?text=" + pkg.destination
-          }
-          alt={pkg.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
-        />
-        <div className="absolute top-3 right-3 bg-[#A8D5E2] text-white px-3 py-1 rounded-full text-sm font-bold">
-          ₹{pkg.price.toLocaleString()}
-        </div>
-        {!pkg.isActive && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <span className="text-white text-lg font-bold">Deactivated</span>
-          </div>
-        )}
-      </div>
+    <Link to={`/packages/${pkg._id}`}>
+      <div className="group cursor-pointer">
+        {/* Card Container */}
+        <div className="bg-white rounded-sm overflow-hidden border border-espresso/10 hover:border-champagne transition-all duration-300 hover:shadow-xl">
+          {/* Image Container */}
+          <div className="relative h-80 overflow-hidden">
+            <img
+              src={
+                pkg.image ||
+                "https://via.placeholder.com/400x400?text=" + pkg.destination
+              }
+              alt={pkg.title}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            />
 
-      {/* Content */}
-      <div className="p-3 sm:p-5">
-        <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 line-clamp-2">
-          {pkg.title}
-        </h3>
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-espresso via-espresso/20 to-transparent"></div>
 
-        {/* Details */}
-        <div className="space-y-2 text-xs sm:text-sm text-gray-600 mb-4">
-          <div className="flex items-center gap-2">
-            <FiMapPin className="text-[#A8D5E2]" />
-            <span>{pkg.destination}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <FiClock className="text-[#B4E7E1]" />
-            <span>{pkg.duration} days</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <FiUsers className="text-[#F5E6B3]" />
-            <span>{pkg.maxParticipants} max participants</span>
-          </div>
-        </div>
-
-        {/* Description */}
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-          {pkg.description}
-        </p>
-
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {pkg.highlights?.slice(0, 2).map((highlight, idx) => (
-            <span
-              key={idx}
-              className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded"
+            {/* Badge */}
+            <div
+              className={`absolute top-4 right-4 px-3 py-1 text-xs font-bold tracking-widest rounded-sm ${
+                isOlive ? "bg-olive text-white" : "bg-champagne text-espresso"
+              }`}
             >
-              {highlight}
-            </span>
-          ))}
-        </div>
+              {badge}
+            </div>
 
-        {/* Button */}
-        {pkg.isActive ? (
-          <Link
-            to={`/packages/${pkg._id}`}
-            className="inline-flex items-center justify-center gap-2 bg-[#A8D5E2] text-white px-4 py-3 sm:py-2 rounded-lg hover:bg-blue-300 transition w-full font-semibold text-sm sm:text-base touch-target"
-          >
-            View Details <FiArrowRight />
-          </Link>
-        ) : (
-          <button className="w-full bg-gray-300 text-gray-600 px-4 py-3 rounded-lg cursor-not-allowed font-semibold">
-            Not Available
-          </button>
-        )}
+            {/* Price & Rating (Bottom Left) */}
+            <div className="absolute bottom-4 left-4 right-4 text-white flex justify-between items-end">
+              <div>
+                <p className="text-xs font-light opacity-80 mb-1">FROM</p>
+                <p className="font-serif text-3xl font-bold">
+                  ₹{Math.floor(pkg.price / 1000)}K
+                </p>
+              </div>
+              <div className="flex items-center gap-1 bg-white/20 backdrop-blur px-3 py-1 rounded-sm">
+                <FiStar className="w-4 h-4 fill-champagne text-champagne" />
+                <span className="text-sm font-semibold">{rating}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-6">
+            {/* Title */}
+            <h3 className="font-serif text-xl text-espresso mb-3 line-clamp-2 group-hover:text-champagne transition-colors">
+              {pkg.title}
+            </h3>
+
+            {/* Destination & Duration */}
+            <div className="space-y-2 mb-6">
+              <div className="flex items-center gap-2 text-espresso/60 text-sm">
+                <FiMapPin className="w-4 h-4" />
+                <span>{pkg.destination}</span>
+              </div>
+              <div className="flex items-center gap-2 text-espresso/60 text-sm">
+                <FiCalendar className="w-4 h-4" />
+                <span>{pkg.duration} days</span>
+              </div>
+            </div>
+
+            {/* Description */}
+            <p className="text-espresso/70 text-sm line-clamp-2 mb-6 font-light leading-relaxed">
+              {pkg.description ||
+                "Curated boutique experience with local storytellers"}
+            </p>
+
+            {/* CTA Button */}
+            <button className="w-full bg-gradient-to-br from-[#E2C766] to-[#C9A535] text-white font-semibold py-3 rounded-sm hover:opacity-90 hover:shadow-lg transition-all duration-300 text-sm tracking-wide">
+              VIEW JOURNEY →
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }

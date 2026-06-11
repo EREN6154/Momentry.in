@@ -7,10 +7,13 @@ import Home from "./pages/Home";
 import Packages from "./pages/Packages";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
 import PackageDetail from "./pages/PackageDetail";
 import Payment from "./pages/Payment";
 import MyBookings from "./pages/MyBookings";
+import BookingConfirmation from "./pages/BookingConfirmation";
 import "./styles/global.css";
 
 function App() {
@@ -46,11 +49,21 @@ function App() {
             <Route path="/packages/:id" element={<PackageDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/bookings"
               element={
                 <ProtectedRoute>
                   <MyBookings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/booking-confirmation/:bookingId"
+              element={
+                <ProtectedRoute>
+                  <BookingConfirmation />
                 </ProtectedRoute>
               }
             />

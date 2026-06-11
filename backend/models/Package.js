@@ -34,6 +34,19 @@ const PackageSchema = new mongoose.Schema({
       description: String,
     },
   ],
+  departureDate: {
+    type: Date,
+  },
+  bookingEndDate: {
+    type: Date,
+  },
+  difficulty: {
+    type: String,
+    default: "Moderate",
+  },
+  leadGuide: {
+    type: String,
+  },
   isActive: {
     type: Boolean,
     default: true,

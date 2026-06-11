@@ -33,6 +33,10 @@ export const createPackage = async (req, res) => {
       image,
       highlights,
       itinerary,
+      departureDate,
+      bookingEndDate,
+      difficulty,
+      leadGuide,
     } = req.body;
 
     const pkg = new Package({
@@ -45,6 +49,10 @@ export const createPackage = async (req, res) => {
       image,
       highlights,
       itinerary,
+      departureDate,
+      bookingEndDate,
+      difficulty,
+      leadGuide,
       createdBy: req.userId,
     });
 

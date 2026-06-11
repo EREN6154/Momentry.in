@@ -121,13 +121,13 @@ export default function Footer() {
             <p className="text-gray-300 mb-3 text-sm font-light">
               Get latest travel deals
             </p>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col gap-2">
               <input
                 type="email"
                 placeholder="Your email"
-                className="flex-1 px-3 py-3 rounded-md text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-champagne"
+                className="w-full px-4 py-2.5 rounded-sm text-espresso text-sm focus:outline-none focus:ring-1 focus:ring-champagne bg-white"
               />
-              <button className="bg-gradient-to-br from-[#E2C766] to-[#C9A535] text-white px-5 py-3 rounded-md hover:opacity-90 transition font-semibold text-base touch-target">
+              <button className="w-full bg-gradient-to-br from-[#E2C766] to-[#C9A535] text-white py-2.5 rounded-sm hover:opacity-90 transition font-bold text-xs tracking-widest uppercase font-sans">
                 Subscribe
               </button>
             </div>

@@ -73,7 +73,7 @@ export const verifyPayment = async (req, res) => {
     await Booking.findByIdAndUpdate(bookingId, { status: "confirmed" });
 
     // Update payment status
-    await Payment.findByIdAndUpdate(bookingId, {
+    await Payment.findOneAndUpdate({ bookingId }, {
       razorpayPaymentId: paymentId,
       razorpaySignature: signature,
       status: "completed",

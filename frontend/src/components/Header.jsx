@@ -8,6 +8,7 @@ export default function Header() {
   const { user, isAdmin, logout } = useAuthStore();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
 
   const handleLogout = () => {
     logout();
@@ -35,33 +36,31 @@ export default function Header() {
           </Link>
 
           {/* Navigation - Desktop */}
-          <nav className="hidden md:flex gap-6 items-center">
-            <Link
-              to="/"
-              className="text-espresso/80 hover:text-champagne transition font-medium"
-            >
-              Home
-            </Link>
+          <nav className="hidden md:flex gap-8 items-center">
             <Link
               to="/packages"
-              className="text-espresso/80 hover:text-champagne transition font-medium"
+              className="text-espresso/80 hover:text-champagne transition font-medium border-b-2 border-transparent hover:border-champagne/40 pb-1"
             >
-              Packages
+              Trips
+            </Link>
+            <Link
+              to="/about"
+              className="text-espresso/80 hover:text-champagne transition font-medium border-b-2 border-transparent hover:border-champagne/40 pb-1"
+            >
+              About Us
+            </Link>
+            <Link
+              to="/testimonials"
+              className="text-espresso/80 hover:text-champagne transition font-medium border-b-2 border-transparent hover:border-champagne/40 pb-1"
+            >
+              Testimonials
             </Link>
             {user && (
               <Link
                 to="/bookings"
-                className="text-espresso/80 hover:text-champagne transition font-medium"
+                className="text-espresso/80 hover:text-champagne transition font-medium border-b-2 border-transparent hover:border-champagne/40 pb-1"
               >
-                My Bookings
-              </Link>
-            )}
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="text-espresso/80 hover:text-olive transition font-medium"
-              >
-                Admin Panel
+                My Journeys
               </Link>
             )}
           </nav>
@@ -69,15 +68,44 @@ export default function Header() {
           {/* Right Section */}
           <div className="hidden md:flex items-center gap-4">
             {user ? (
-              <>
-                <span className="text-espresso/80 font-medium">Welcome, {user.name}</span>
+              <div className="relative">
                 <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 bg-gradient-to-br from-[#E2C766] to-[#C9A535] text-white px-5 py-2.5 rounded-md hover:opacity-90 hover:shadow-md transition font-medium"
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  onBlur={() => setTimeout(() => setProfileDropdownOpen(false), 200)}
+                  className="w-10 h-10 rounded-full bg-[#1E323A] text-white flex items-center justify-center font-semibold text-sm hover:opacity-90 transition border border-white/10 shadow-sm"
                 >
-                  <FiLogOut /> Logout
+                  {user.name ? user.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() : "U"}
                 </button>
-              </>
+                
+                {profileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-espresso/10 rounded-md shadow-lg py-2 z-50 animate-fadeIn">
+                    <div className="px-4 py-2 border-b border-espresso/5">
+                      <p className="text-xs text-espresso/50 font-bold uppercase tracking-wider">Account</p>
+                      <p className="text-sm font-semibold text-espresso truncate">{user.name}</p>
+                    </div>
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-sm text-espresso hover:bg-cream transition"
+                      >
+                        Admin Panel
+                      </Link>
+                    )}
+                    <Link
+                      to="/bookings"
+                      className="block px-4 py-2 text-sm text-espresso hover:bg-cream transition"
+                    >
+                      My Journeys
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link

@@ -13,6 +13,8 @@ import {
   FiLock,
   FiChevronDown,
   FiChevronRight,
+  FiCheck,
+  FiStar,
 } from "react-icons/fi";
 
 export default function PackageDetail() {
@@ -85,299 +87,289 @@ export default function PackageDetail() {
     setLoading(false);
   };
 
+  const [activeTab, setActiveTab] = useState("journey");
+
   const totalPrice = pkg.price * quantity;
 
+  // Render content depending on active tab
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "journey":
+        return (
+          <div className="space-y-0">
+            {pkg.itinerary && pkg.itinerary.length > 0 ? (
+              pkg.itinerary.map((day, idx) => {
+                const isOpen = openDay === day.day;
+                return (
+                  <div
+                    key={idx}
+                    className="border-b border-espresso/10 py-5 last:border-b-0"
+                  >
+                    <button
+                      onClick={() => setOpenDay(isOpen ? null : day.day)}
+                      className="w-full flex items-center justify-between text-left transition focus:outline-none"
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="font-mono text-xs uppercase tracking-widest text-champagne font-semibold">
+                          DAY {String(day.day).padStart(2, "0")}
+                        </span>
+                        <span className="font-serif text-lg md:text-xl font-bold text-espresso hover:text-champagne transition-colors">
+                          {day.title}
+                        </span>
+                      </div>
+                      <span className="text-espresso/40 ml-2">
+                        {isOpen ? <FiChevronDown size={18} /> : <FiChevronRight size={18} />}
+                      </span>
+                    </button>
+                    
+                    {/* Expanded Content */}
+                    {isOpen && (
+                      <div className="mt-4 pl-0 md:pl-[64px] animate-fadeIn">
+                        <p className="text-espresso/70 text-sm md:text-base font-light leading-relaxed">
+                          {day.description}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            ) : (
+              <p className="text-espresso/60 font-light italic">No itinerary details available.</p>
+            )}
+          </div>
+        );
+      case "stays":
+        return (
+          <div className="space-y-6">
+            <div className="border border-espresso/10 p-6 bg-white rounded-md">
+              <span className="text-[10px] text-champagne font-bold tracking-widest uppercase">PRIMARY LODGING</span>
+              <h3 className="font-serif text-xl font-bold text-espresso mt-1 mb-2">Heritage Machiya Townhouse</h3>
+              <p className="text-espresso/70 text-sm font-light leading-relaxed">
+                Stay in a meticulously restored historical machiya residence. Features traditional paper sliding doors, tatami mats, and modern luxury amenities to give you an authentic Kyoto home experience.
+              </p>
+            </div>
+            <div className="border border-espresso/10 p-6 bg-white rounded-md">
+              <span className="text-[10px] text-champagne font-bold tracking-widest uppercase">RETREAT RETREAT</span>
+              <h3 className="font-serif text-xl font-bold text-espresso mt-1 mb-2">Private Onsen Ryokan</h3>
+              <p className="text-espresso/70 text-sm font-light leading-relaxed">
+                Rejuvenate at a high-end hot spring resort. Unwind in mineral-rich outdoor thermal baths and indulge in multi-course kaiseki dinners crafted with seasonal regional ingredients.
+              </p>
+            </div>
+          </div>
+        );
+      case "included":
+        return (
+          <div className="space-y-4">
+            <h3 className="font-serif text-2xl font-bold text-espresso mb-4">What's Included in Your Journey</h3>
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {pkg.highlights?.map((highlight, idx) => (
+                <li key={idx} className="flex items-start gap-3 bg-white border border-espresso/5 p-4 rounded-md">
+                  <FiCheck className="text-olive mt-1 flex-shrink-0 text-lg stroke-[3]" />
+                  <span className="text-espresso/80 text-sm font-light">
+                    {highlight}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      case "reviews":
+        return (
+          <div className="space-y-6">
+            {/* Rating Summary */}
+            <div className="flex items-center gap-6 p-6 border border-espresso/10 rounded-md bg-white">
+              <div className="text-center border-r border-espresso/10 pr-6">
+                <span className="text-5xl font-serif font-bold text-espresso">4.9</span>
+                <p className="text-xs text-espresso/50 tracking-wide mt-1">out of 5 stars</p>
+              </div>
+              <div>
+                <div className="flex text-[#E2C766] gap-1 text-lg mb-1">
+                  <FiStar className="fill-current" />
+                  <FiStar className="fill-current" />
+                  <FiStar className="fill-current" />
+                  <FiStar className="fill-current" />
+                  <FiStar className="fill-current" />
+                </div>
+                <p className="text-sm font-medium text-espresso">212 Verified Reviews</p>
+                <p className="text-xs text-espresso/50 font-light mt-0.5">100% of guests recommend this trip.</p>
+              </div>
+            </div>
+
+            {/* Guest Reviews */}
+            <div className="space-y-4">
+              <div className="border border-espresso/5 p-5 bg-white rounded-md">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-espresso text-sm">Aanya Kapoor</span>
+                  <span className="text-xs text-espresso/40">Verified Traveler · Jun 2026</span>
+                </div>
+                <p className="text-espresso/70 text-sm font-light leading-relaxed">
+                  "An absolute dream! The local storytellers in Gion were fantastic, and sleeping in the machiya townhouse was an unforgettable experience. The attention to detail was incredible."
+                </p>
+              </div>
+              <div className="border border-espresso/5 p-5 bg-white rounded-md">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-espresso text-sm">Kabir Mehta</span>
+                  <span className="text-xs text-espresso/40">Verified Traveler · May 2026</span>
+                </div>
+                <p className="text-espresso/70 text-sm font-light leading-relaxed">
+                  "Perfect curation. The Arashiyama bamboo forest tour and private tea master ceremony were highlights. Recommended for anyone seeking deep cultural immersion."
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-alabaster">
-      {/* Hero Image with Title Overlay */}
-      <div className="relative h-96 overflow-hidden">
-        <img
-          src={
-            pkg.image ||
-            "https://via.placeholder.com/1200x400?text=" + pkg.destination
-          }
-          alt={pkg.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-espresso/80 via-espresso/30 to-transparent"></div>
+    <div className="min-h-screen bg-[#FAF8F5] pb-16">
+      <div className="max-w-6xl mx-auto px-6 pt-10">
+        
+        {/* Dark Blue Hero Banner Card */}
+        <div className="relative bg-[#1F323A] rounded-2xl p-8 md:p-12 mb-10 overflow-hidden shadow-lg min-h-[200px] flex flex-col justify-end">
+          {/* Decorative background image blend */}
+          <div 
+            className="absolute inset-0 opacity-15 pointer-events-none bg-cover bg-center"
+            style={{ backgroundImage: `url(${pkg.image || ''})` }}
+          />
+          
+          {/* Badge */}
+          <div className="absolute top-6 left-6 bg-[#C9A535] text-white px-3 py-1 text-[10px] font-bold tracking-widest rounded uppercase">
+            Best Seller
+          </div>
 
-        {/* Badge */}
-        <div className="absolute top-6 left-6 bg-champagne text-espresso px-4 py-1 text-xs font-bold tracking-widest rounded-sm">
-          CURATED JOURNEY
-        </div>
-
-        {/* Title */}
-        <div className="absolute bottom-8 left-0 right-0 px-6">
-          <div className="max-w-6xl mx-auto">
-            <h1 className="font-serif text-4xl md:text-5xl text-white mb-2">
+          {/* Banner Contents */}
+          <div className="relative z-10">
+            <h1 className="font-serif text-3xl md:text-5xl text-white mb-3">
               {pkg.title}
             </h1>
-            <p className="text-white/80 text-sm tracking-[0.2em] uppercase">
-              {pkg.destination} · {pkg.duration} Days
+            <p className="text-white/80 text-xs md:text-sm tracking-widest uppercase font-light">
+              {pkg.destination} · {pkg.duration} DAYS / {pkg.duration - 1} NIGHTS · ★ 4.9 (212 verified reviews)
             </p>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
+        {/* Page Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          
+          {/* Left Column: Details & Tabs */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-sm border border-espresso/10 p-8">
-              {/* Details Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 py-6 border-y border-espresso/10">
-                <div className="flex items-center gap-4">
-                  <FiMapPin className="text-2xl text-champagne" />
-                  <div>
-                    <p className="text-xs text-espresso/50 tracking-widest">
-                      DESTINATION
-                    </p>
-                    <p className="text-lg font-semibold text-espresso">
-                      {pkg.destination}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <FiClock className="text-2xl text-champagne" />
-                  <div>
-                    <p className="text-xs text-espresso/50 tracking-widest">
-                      DURATION
-                    </p>
-                    <p className="text-lg font-semibold text-espresso">
-                      {pkg.duration} Days
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <FiUsers className="text-2xl text-champagne" />
-                  <div>
-                    <p className="text-xs text-espresso/50 tracking-widest">
-                      MAX GROUP
-                    </p>
-                    <p className="text-lg font-semibold text-espresso">
-                      {pkg.maxParticipants} People
-                    </p>
-                  </div>
-                </div>
-              </div>
+            
+            {/* Tab Bar Navigation */}
+            <div className="flex border-b border-espresso/10 mb-8 overflow-x-auto gap-8">
+              {[
+                { id: "journey", label: "The Journey" },
+                { id: "stays", label: "Stays & Comfort" },
+                { id: "included", label: "What's Included" },
+                { id: "reviews", label: "Reviews" }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`pb-4 text-sm font-semibold tracking-wide border-b-2 transition-all whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? "border-[#C9A535] text-espresso"
+                      : "border-transparent text-espresso/40 hover:text-espresso/70"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-              {/* Description */}
-              <div className="mb-10">
-                <h2 className="font-serif text-3xl text-espresso mb-4">
-                  The Journey
-                </h2>
-                <p className="text-espresso/70 leading-relaxed font-light">
-                  {pkg.description}
-                </p>
-              </div>
-
-              {/* Highlights */}
-              <div className="mb-10">
-                <h2 className="font-serif text-3xl text-espresso mb-4">
-                  What's Included
-                </h2>
-                <ul className="space-y-3">
-                  {pkg.highlights?.map((highlight, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <FiCheckCircle className="text-olive mt-1 flex-shrink-0" />
-                      <span className="text-espresso/80 font-light">
-                        {highlight}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Itinerary */}
-              {pkg.itinerary && pkg.itinerary.length > 0 && (
-                <div className="mb-10">
-                  <h2 className="font-serif text-3xl text-espresso mb-6">
-                    Day-by-Day Itinerary
-                  </h2>
-                  <div className="border border-espresso/10 rounded-sm overflow-hidden bg-white">
-                    {pkg.itinerary.map((day, idx) => {
-                      const isOpen = openDay === day.day;
-                      return (
-                        <div
-                          key={idx}
-                          className={`border-b border-espresso/10 last:border-b-0 transition-colors duration-200 ${isOpen ? 'bg-[#FAF9F7]' : 'bg-white'}`}
-                        >
-                          <button
-                            onClick={() => setOpenDay(isOpen ? null : day.day)}
-                            className="w-full flex items-center justify-between p-5 text-left transition focus:outline-none"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="text-[10px] bg-champagne text-espresso font-bold tracking-widest px-2.5 py-1 rounded-sm uppercase">
-                                DAY {String(day.day).padStart(2, "0")}
-                              </span>
-                              <span className="font-serif text-lg font-bold text-espresso">
-                                {day.title}
-                              </span>
-                            </div>
-                            <span className="text-espresso/40">
-                              {isOpen ? <FiChevronDown size={20} /> : <FiChevronRight size={20} />}
-                            </span>
-                          </button>
-                          
-                          {/* Expanded Content */}
-                          {isOpen && (
-                            <div className="px-5 pb-6 pt-1 border-t border-espresso/5 animate-fadeIn">
-                              <p className="text-espresso/70 text-sm font-light leading-relaxed pl-0 sm:pl-16">
-                                {day.description}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+            {/* Tab Contents Panel */}
+            <div className="animate-fadeIn">
+              {renderTabContent()}
             </div>
           </div>
 
-          {/* Sticky Booking Card */}
+          {/* Right Column: Sticky Booking Card */}
           <div>
-            <div className="bg-white rounded-sm border border-champagne/40 p-6 sticky top-24 shadow-lg">
+            <div className="bg-white border border-[#E5E0D5] rounded-2xl p-6 sticky top-24 shadow-md">
               <div className="mb-6">
-                <p className="text-xs text-espresso/50 tracking-widest mb-1">
-                  FROM
+                <p className="text-[10px] text-espresso/40 tracking-widest uppercase font-bold mb-1">
+                  From
                 </p>
-                <h3 className="font-serif text-4xl font-bold text-espresso">
+                <h3 className="font-serif text-3xl md:text-4xl font-bold text-espresso">
                   ₹{pkg.price.toLocaleString()}
-                  <span className="text-base font-light text-espresso/60">
-                    {" "}
-                    / person
-                  </span>
+                  <span className="text-sm font-light text-espresso/50"> / person</span>
                 </h3>
               </div>
 
-              {/* Countdown Timer */}
-              {timeLeft && (
-                <div className="mb-6 p-4 bg-cream/50 border border-champagne/20 rounded-sm">
-                  {timeLeft.expired ? (
-                    <p className="text-red-700 text-sm font-bold flex items-center justify-center gap-1.5">
-                      ⚠️ BOOKING CLOSED
-                    </p>
-                  ) : (
-                    <div className="text-center">
-                      <p className="text-[10px] text-espresso/60 font-semibold tracking-wider uppercase mb-1">
-                        ⌛ BOOKING CLOSES IN
-                      </p>
-                      <p className="font-serif text-lg font-bold text-espresso">
-                        {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
-                      </p>
-                    </div>
-                  )}
+              {/* Departure and Travelers Custom Split Input Panel */}
+              <div className="grid grid-cols-2 gap-0 border border-espresso/10 rounded-xl mb-6 overflow-hidden bg-[#FAF8F5]">
+                <div className="p-3.5 border-r border-espresso/10 flex flex-col justify-center">
+                  <span className="text-[9px] text-espresso/40 font-bold tracking-widest uppercase">
+                    DEPARTURE
+                  </span>
+                  <span className="text-xs md:text-sm font-semibold text-espresso mt-1">
+                    {pkg.departureDate ? formatDate(pkg.departureDate) : "Oct 12, 2026"}
+                  </span>
                 </div>
-              )}
-
-              {pkg.departureDate && (
-                <div className="mb-6 p-4 bg-alabaster border border-espresso/10 rounded-sm flex flex-col justify-center">
-                  <p className="text-[10px] text-espresso/50 font-bold tracking-widest uppercase mb-1">
-                    DEPARTURE DATE
-                  </p>
-                  <p className="text-base font-semibold text-espresso">
-                    {formatDate(pkg.departureDate)}
-                  </p>
-                </div>
-              )}
-
-              <div className="mb-6 pb-6 border-b border-espresso/10">
-                <label className="block text-xs font-bold text-espresso/60 tracking-widest mb-3">
-                  TRAVELERS
-                </label>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="bg-alabaster border border-espresso/20 text-espresso w-10 h-10 rounded-sm flex items-center justify-center hover:border-champagne transition"
-                  >
-                    −
-                  </button>
-                  <input
-                    type="number"
+                <div className="p-3.5 flex flex-col justify-center relative">
+                  <span className="text-[9px] text-espresso/40 font-bold tracking-widest uppercase">
+                    TRAVELERS
+                  </span>
+                  <select
                     value={quantity}
-                    onChange={(e) =>
-                      setQuantity(
-                        Math.max(
-                          1,
-                          Math.min(
-                            pkg.maxParticipants,
-                            parseInt(e.target.value) || 1,
-                          ),
-                        ),
-                      )
-                    }
-                    className="w-16 text-center border border-espresso/20 rounded-sm py-2 text-espresso focus:outline-none focus:border-champagne"
-                  />
-                  <button
-                    onClick={() =>
-                      setQuantity(Math.min(pkg.maxParticipants, quantity + 1))
-                    }
-                    className="bg-alabaster border border-espresso/20 text-espresso w-10 h-10 rounded-sm flex items-center justify-center hover:border-champagne transition"
+                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                    className="text-xs md:text-sm font-semibold text-espresso mt-1 bg-transparent border-none focus:outline-none appearance-none cursor-pointer pr-6 w-full font-sans"
                   >
-                    +
-                  </button>
+                    {[...Array(pkg.maxParticipants || 10).keys()].map((i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1} {i + 1 === 1 ? "Adult" : "Adults"}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute right-3.5 bottom-4 text-espresso/40">
+                    <FiChevronDown size={14} />
+                  </div>
                 </div>
               </div>
 
-              <div className="mb-6 pb-6 border-b border-espresso/10">
-                <div className="flex justify-between mb-3 text-sm">
-                  <span className="text-espresso/60 font-light">
-                    Base price × {quantity}
-                  </span>
-                  <span className="text-espresso">
-                    ₹{(pkg.price * quantity).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-espresso">Total</span>
-                  <span className="font-serif text-2xl font-bold text-espresso">
-                    ₹{totalPrice.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-
+              {/* Book Now Button */}
               {pkg.isActive && !(timeLeft && timeLeft.expired) ? (
                 <button
                   onClick={handleBooking}
                   disabled={loading}
-                  className="w-full bg-gradient-to-br from-[#E2C766] to-[#C9A535] text-white font-semibold py-4 rounded-sm hover:opacity-90 hover:shadow-lg transition disabled:opacity-50 tracking-wide"
+                  className="w-full bg-[#1A1A1A] hover:bg-[#2A2A2A] text-white font-semibold py-4 rounded-xl shadow transition duration-200 disabled:opacity-50 tracking-wider text-sm font-sans"
                 >
-                  {loading
-                    ? "Processing..."
-                    : "Book Now — Secure with Razorpay"}
+                  {loading ? "Processing..." : "Book Now — Secure with Razorpay"}
                 </button>
               ) : (
                 <button
                   disabled
-                  className="w-full bg-espresso/20 text-espresso/50 font-semibold py-4 rounded-sm cursor-not-allowed"
+                  className="w-full bg-espresso/10 text-espresso/40 font-semibold py-4 rounded-xl cursor-not-allowed text-sm"
                 >
                   {timeLeft && timeLeft.expired ? "Booking Closed" : "Not Available"}
                 </button>
               )}
 
-              <p className="text-xs text-espresso/50 text-center mt-4 flex items-center justify-center gap-1">
-                <FiLock className="w-3 h-3" />
-                Secure payment powered by Razorpay
+              <p className="text-[11px] text-espresso/50 text-center mt-3">
+                Free cancellation up to 30 days before departure
               </p>
 
-              {/* Trust points */}
-              <div className="mt-6 pt-6 border-t border-espresso/10 space-y-2">
-                <p className="text-sm text-espresso/70 flex items-center gap-2 font-light">
-                  <span className="text-olive">✓</span> Handpicked boutique
-                  stays
-                </p>
-                <p className="text-sm text-espresso/70 flex items-center gap-2 font-light">
-                  <span className="text-olive">✓</span> Expert local
-                  storytellers
-                </p>
-                <p className="text-sm text-espresso/70 flex items-center gap-2 font-light">
-                  <span className="text-olive">✓</span> 24/7 premium concierge
-                </p>
+              <hr className="my-5 border-espresso/5" />
+
+              {/* Value Checkmarks */}
+              <div className="space-y-3">
+                {[
+                  "Handpicked boutique stays",
+                  "Expert local storytellers",
+                  "24/7 premium concierge"
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3 text-xs text-espresso/70 font-light">
+                    <FiCheck className="text-espresso/60 text-sm flex-shrink-0 stroke-[3.5]" />
+                    <span>{item}</span>
+                  </div>
+                ))}
               </div>
+
             </div>
           </div>
+
         </div>
       </div>
     </div>

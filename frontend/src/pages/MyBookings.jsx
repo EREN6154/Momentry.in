@@ -3,10 +3,9 @@ import { Link } from "react-router-dom";
 import { useBookingStore, usePackageStore } from "../store/useStore";
 import {
   FiMapPin,
-  FiUser,
-  FiCheckCircle,
   FiArrowRight,
-  FiChevronRight,
+  FiCheck,
+  FiDownload,
 } from "react-icons/fi";
 
 export default function MyBookings() {
@@ -24,7 +23,7 @@ export default function MyBookings() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-alabaster">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5]">
         <p className="font-serif text-2xl text-espresso animate-pulse">
           Loading your travel hub...
         </p>
@@ -38,254 +37,320 @@ export default function MyBookings() {
     ? packages?.find((p) => p._id === upcomingBooking.packageId)
     : null;
 
-  // Calculate days until departure
+  // Calculate destination settings
   let daysUntilDeparture = 30;
   let formattedDates = "Oct 12 - 19, 2026";
   let departureDayLabel = "Oct 12";
+  let airportText = "DEL → KIX";
+  let weatherTemp = "28°";
+  let weatherText = "28°C · Clear skies";
+  let packingGuide = [
+    "Passport & visas",
+    "Comfortable walking shoes",
+    "Light rain jacket",
+    "Power adapter (Type A)",
+  ];
 
   if (upcomingPackage) {
     const now = new Date();
     const depDate = upcomingPackage.departureDate
       ? new Date(upcomingPackage.departureDate)
-      : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      : new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000);
     const diffTime = depDate.getTime() - now.getTime();
     daysUntilDeparture = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
-    // Formatted Dates: e.g. "Oct 12 - 14, 2026"
-    const durationDays = upcomingPackage.duration || 2;
+    const durationDays = upcomingPackage.duration || 7;
     const endDate = new Date(depDate.getTime() + (durationDays - 1) * 24 * 60 * 60 * 1000);
     const options = { month: "short", day: "numeric" };
     formattedDates = `${depDate.toLocaleDateString("en-US", options)} - ${endDate.toLocaleDateString("en-US", { ...options, year: "numeric" })}`;
     departureDayLabel = depDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+    // Set custom values based on destination
+    const dest = upcomingPackage.destination.toLowerCase();
+    if (dest.includes("kyoto") || dest.includes("japan")) {
+      airportText = "DEL → KIX";
+      weatherTemp = "28°";
+      weatherText = "28°C · Clear skies";
+      packingGuide = [
+        "Passport & visas",
+        "Comfortable walking shoes",
+        "Light rain jacket",
+        "Power adapter (Type A)",
+      ];
+    } else if (dest.includes("himachal") || dest.includes("kasol") || dest.includes("triund") || dest.includes("manali")) {
+      airportText = "DEL → IXC";
+      weatherTemp = "18°";
+      weatherText = "18°C · Light rain";
+      packingGuide = [
+        "Trekking shoes",
+        "Warm layers / fleece jacket",
+        "Rain poncho",
+        "Water bottle & snacks",
+      ];
+    } else if (dest.includes("uttarakhand") || dest.includes("kedarnath") || dest.includes("tungnath")) {
+      airportText = "DEL → DED";
+      weatherTemp = "15°";
+      weatherText = "15°C · Heavy clouds";
+      packingGuide = [
+        "Warm jacket / thermals",
+        "Hiking stick",
+        "Small backpack",
+        "Personal medicines",
+      ];
+    } else if (dest.includes("rajasthan") || dest.includes("jaipur") || dest.includes("udaipur")) {
+      airportText = "DEL → JAI";
+      weatherTemp = "34°";
+      weatherText = "34°C · Sunny & dry";
+      packingGuide = [
+        "Light cotton clothes",
+        "Sunscreen & sunglasses",
+        "Sun hat / cap",
+        "Comfortable sandals",
+      ];
+    } else if (dest.includes("goa")) {
+      airportText = "DEL → GOI";
+      weatherTemp = "31°";
+      weatherText = "31°C · Hot & humid";
+      packingGuide = [
+        "Swimwear & shorts",
+        "Sunscreen lotion",
+        "Beach slippers",
+        "Sunglasses & cap",
+      ];
+    } else {
+      airportText = "DEL → IXC";
+      weatherTemp = "25°";
+      weatherText = "25°C · Partly cloudy";
+    }
   }
 
   const displayBookingId = upcomingBooking
     ? `#BK-${upcomingBooking._id.substring(0, 6).toUpperCase()}`
     : "#BK-9024A1";
 
-  const timelineSteps = [
-    {
-      label: "Payment Confirmed",
-      description: `Receipt & invoice sent to your inbox · Jun 5`,
-      completed: true,
-      tag: "DONE",
-    },
-    {
-      label: "Hotel & Flight Vouchers Issued",
-      description: "Boutique stays + transport itinerary confirmed",
-      completed: true,
-      tag: "DONE",
-      download: true,
-    },
-    {
-      label: "Local Guide Assignment",
-      description: "Your storyteller's profile unlocks 48 hrs before departure",
-      completed: false,
-      inProgress: true,
-      tag: "IN PROGRESS",
-    },
-    {
-      label: "Departure",
-      description: `${departureDayLabel} · 08:00 AM · Delhi -> ${upcomingPackage?.destination || "Destination"}`,
-      completed: false,
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-[#FAF9F7] py-12">
+    <div className="min-h-screen bg-[#FAF8F5] py-16">
       <div className="max-w-6xl mx-auto px-6">
-        <h1 className="font-serif text-4xl md:text-5xl font-bold text-espresso mb-2">
-          Travel Hub
-        </h1>
-        <p className="text-espresso/60 text-base md:text-lg font-light mb-10">
-          Your journey, perfectly organized
-        </p>
-
+        
         {bookings && bookings.length > 0 ? (
           <div className="space-y-12">
-            {/* Upcoming Journey Card */}
-            {upcomingPackage && (
-              <div className="bg-[#F7F3EC] border border-[#C9A535]/30 rounded-sm p-8 md:p-10 shadow-sm">
-                <div className="space-y-6">
-                  <div>
-                    <p className="text-champagne uppercase tracking-[0.2em] text-[10px] font-bold mb-1.5">
-                      Upcoming Journey
+            
+            {/* Travel Hub Header Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+              
+              {/* Left 2 Columns: Journey Card & Timeline */}
+              <div className="lg:col-span-2 space-y-10">
+                
+                {/* Upcoming Journey Card */}
+                {upcomingPackage && (
+                  <div className="bg-[#FAF3E8] border border-[#E5E0D5] rounded-2xl p-6 md:p-8 shadow-sm">
+                    <p className="text-[10px] text-[#C9A535] font-bold tracking-[0.2em] mb-2 uppercase">
+                      UPCOMING JOURNEY
                     </p>
-                    <h2 className="font-serif text-3xl md:text-4xl font-bold text-espresso">
+                    <h2 className="font-serif text-3xl font-bold text-espresso leading-tight">
                       Trip to {upcomingPackage.title}{" "}
-                      <span className="font-sans font-light text-base text-espresso/60 block md:inline md:ml-2">
+                      <span className="font-sans font-light text-sm text-espresso/60 block sm:inline sm:ml-2">
                         starts in {daysUntilDeparture} days
                       </span>
                     </h2>
-                    <p className="text-espresso/60 text-sm font-light mt-2">
-                      {formattedDates} · {upcomingBooking.quantity} Traveler
-                      {upcomingBooking.quantity > 1 ? "s" : ""} · Booking {displayBookingId}
+                    <p className="text-espresso/60 text-xs md:text-sm font-light mt-2">
+                      {formattedDates} · {upcomingBooking.quantity} {upcomingBooking.quantity === 1 ? "traveler" : "travelers"} · Booking {displayBookingId}
                     </p>
-                  </div>
 
-                  {/* Prep Progress */}
-                  <div className="pt-4 max-w-xl">
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="text-[10px] text-espresso/50 font-bold tracking-[0.2em]">
-                        PREP PROGRESS — 62% READY
-                      </p>
-                    </div>
-                    <div className="w-full bg-espresso/10 rounded-full h-1.5">
-                      <div
-                        className="bg-champagne h-1.5 rounded-full"
-                        style={{ width: "62%" }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Timeline & Quick Links Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left Column - Live Timeline */}
-              <div className="lg:col-span-2 bg-white border border-espresso/10 rounded-sm p-6 md:p-8 shadow-sm">
-                <h3 className="font-serif text-2xl font-bold text-espresso mb-8">
-                  Live Timeline
-                </h3>
-
-                <div className="space-y-0 pl-2">
-                  {timelineSteps.map((step, index) => (
-                    <div key={index} className="flex gap-6">
-                      <div className="flex flex-col items-center">
-                        <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 z-10 ${
-                            step.completed
-                              ? "bg-olive text-white"
-                              : step.inProgress
-                                ? "bg-champagne text-white"
-                                : "bg-[#FAF9F7] text-espresso/40 border border-espresso/20"
-                          }`}
-                        >
-                          {step.completed ? (
-                            <FiCheckCircle size={18} />
-                          ) : step.inProgress ? (
-                            "…"
-                          ) : (
-                            index + 1
-                          )}
-                        </div>
-                        {index < timelineSteps.length - 1 && (
-                          <div
-                            className={`w-0.5 h-16 my-1 ${
-                              step.completed
-                                ? "bg-olive"
-                                : "bg-espresso/10 border-l border-dashed border-espresso/20"
-                            }`}
-                          ></div>
-                        )}
-                      </div>
-                      <div className="pb-8 flex-1">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <p
-                            className={`text-base font-semibold ${
-                              step.completed || step.inProgress
-                                ? "text-espresso"
-                                : "text-espresso/40"
-                            }`}
-                          >
-                            {step.label}
-                          </p>
-                          {step.download && (
-                            <a
-                              href="#"
-                              onClick={(e) => e.preventDefault()}
-                              className="text-xs text-champagne font-semibold hover:underline"
-                            >
-                              [ Download PDF ⬇ ]
-                            </a>
-                          )}
-                          {step.tag && (
-                            <span
-                              className={`px-2 py-0.5 rounded-sm text-[9px] font-bold tracking-widest ${
-                                step.completed
-                                  ? "bg-olive/15 text-olive"
-                                  : "bg-champagne/15 text-espresso"
-                              }`}
-                            >
-                              {step.tag}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-espresso/50 mt-1 font-light leading-relaxed">
-                          {step.description}
+                    {/* Progress Bar */}
+                    <div className="mt-6">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-[9px] text-espresso/45 font-bold tracking-widest uppercase">
+                          PREP PROGRESS — 62% READY
                         </p>
                       </div>
+                      <div className="w-full bg-espresso/5 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-[#C9A535] h-1.5 rounded-full"
+                          style={{ width: "62%" }}
+                        ></div>
+                      </div>
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                {/* Live Timeline Section */}
+                <div className="space-y-6">
+                  <h3 className="font-serif text-2xl font-bold text-espresso">
+                    Live Timeline
+                  </h3>
+
+                  {/* Timeline Cards Container */}
+                  <div className="bg-white border border-[#E5E0D5] rounded-2xl p-6 md:p-8 shadow-sm">
+                    <div className="relative pl-6 space-y-10">
+                      
+                      {/* Step 1: Payment Confirmed (Completed) */}
+                      <div className="relative flex gap-5">
+                        {/* vertical line segment */}
+                        <div className="absolute -left-[37px] top-[24px] bottom-[-40px] w-0.5 bg-[#6B8E6F]" />
+                        
+                        {/* Circle node */}
+                        <div className="absolute -left-[49px] top-0 w-7 h-7 rounded-full bg-[#6B8E6F] text-white flex items-center justify-center flex-shrink-0 z-10">
+                          <FiCheck size={14} className="stroke-[3]" />
+                        </div>
+                        
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="text-sm md:text-base font-semibold text-espresso">Payment Confirmed</h4>
+                            <span className="px-1.5 py-0.5 rounded bg-[#6B8E6F]/10 text-[#6B8E6F] text-[9px] font-bold tracking-wider uppercase">
+                              DONE
+                            </span>
+                          </div>
+                          <p className="text-xs text-espresso/50 mt-1 font-light">
+                            Receipt & invoice sent to your inbox · Jun 5
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Step 2: Hotel & Flight Vouchers Issued (Completed) */}
+                      <div className="relative flex gap-5">
+                        {/* vertical line segment */}
+                        <div className="absolute -left-[37px] top-[24px] bottom-[-40px] w-0.5 bg-[#6B8E6F]" />
+                        
+                        {/* Circle node */}
+                        <div className="absolute -left-[49px] top-0 w-7 h-7 rounded-full bg-[#6B8E6F] text-white flex items-center justify-center flex-shrink-0 z-10">
+                          <FiCheck size={14} className="stroke-[3]" />
+                        </div>
+                        
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="text-sm md:text-base font-semibold text-espresso">Hotel & Flight Vouchers Issued</h4>
+                            <a 
+                              href="#" 
+                              onClick={(e) => e.preventDefault()}
+                              className="text-[10px] text-[#C9A535] hover:text-[#B48C28] font-bold tracking-wide flex items-center gap-1 uppercase"
+                            >
+                              [ Download PDF <FiDownload className="inline" /> ]
+                            </a>
+                          </div>
+                          <p className="text-xs text-espresso/50 mt-1 font-light">
+                            {upcomingPackage?.destination?.toLowerCase().includes("kyoto") 
+                              ? "Heritage machiya residence + ANA flights confirmed"
+                              : "Boutique stays + transport itinerary confirmed"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Step 3: Local Guide Assignment (In Progress) */}
+                      <div className="relative flex gap-5">
+                        {/* vertical line segment - DASHED */}
+                        <div className="absolute -left-[37px] top-[24px] bottom-[-40px] w-[1px] border-l-2 border-dashed border-[#C9A535]" />
+                        
+                        {/* Circle node */}
+                        <div className="absolute -left-[49px] top-0 w-7 h-7 rounded-full bg-[#FAF6EE] border border-solid border-[#C9A535] text-[#C9A535] flex items-center justify-center flex-shrink-0 z-10 text-[10px] font-bold">
+                          ...
+                        </div>
+                        
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="text-sm md:text-base font-semibold text-espresso">Local Guide Assignment</h4>
+                            <span className="px-1.5 py-0.5 rounded bg-[#FAF3E8] text-[#C9A535] text-[9px] font-bold tracking-wider uppercase border border-[#C9A535]/20">
+                              IN PROGRESS
+                            </span>
+                          </div>
+                          <p className="text-xs text-espresso/50 mt-1 font-light">
+                            Your storyteller's profile unlocks 48 hrs before departure
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Step 4: Departure */}
+                      <div className="relative flex gap-5">
+                        {/* Circle node */}
+                        <div className="absolute -left-[49px] top-0 w-7 h-7 rounded-full bg-[#FAF8F5] border border-solid border-espresso/20 text-espresso/40 flex items-center justify-center flex-shrink-0 z-10">
+                          
+                        </div>
+                        
+                        <div className="flex-1">
+                          <h4 className="text-sm md:text-base font-semibold text-espresso/45">Departure</h4>
+                          <p className="text-xs text-espresso/40 mt-1 font-light">
+                            {departureDayLabel} · 06:40 AM · {airportText}
+                          </p>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
                 </div>
+
               </div>
 
-              {/* Right Column - Quick Links */}
-              <div>
-                <h3 className="font-serif text-2xl font-bold text-espresso mb-8">
+              {/* Right Column: Quick Links Widgets */}
+              <div className="space-y-6">
+                <h3 className="font-serif text-2xl font-bold text-espresso">
                   Quick Links
                 </h3>
+                
                 <div className="space-y-4">
-                  {/* Weather */}
-                  <div className="bg-white border border-espresso/10 rounded-sm p-5 shadow-sm flex items-center justify-between">
+                  
+                  {/* Weather Widget */}
+                  <div className="bg-white border border-[#E5E0D5] rounded-2xl p-5 shadow-sm flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] text-espresso/40 font-bold tracking-[0.2em] mb-1">
-                        {upcomingPackage ? upcomingPackage.destination.toUpperCase() : "KYOTO"} WEATHER
+                      <p className="text-[9px] text-[#C9A535] font-bold tracking-[0.2em] mb-1 uppercase">
+                        {upcomingPackage ? upcomingPackage.destination.split(",")[0].toUpperCase() : "KYOTO"} WEATHER
                       </p>
-                      <p className="text-sm font-semibold text-espresso">28°C · Clear skies</p>
+                      <p className="text-xs md:text-sm font-semibold text-espresso">{weatherText}</p>
                     </div>
-                    <span className="font-serif text-3xl font-bold text-espresso/35">28°</span>
+                    <span className="font-serif text-3xl font-bold text-espresso/30">{weatherTemp}</span>
                   </div>
 
-                  {/* Packing Guide */}
-                  <div className="bg-white border border-espresso/10 rounded-sm p-5 shadow-sm">
-                    <p className="text-[10px] text-espresso/40 font-bold tracking-[0.2em] mb-3">
+                  {/* Packing Guide Widget */}
+                  <div className="bg-white border border-[#E5E0D5] rounded-2xl p-5 shadow-sm">
+                    <p className="text-[9px] text-[#C9A535] font-bold tracking-[0.2em] mb-3 uppercase">
                       PACKING GUIDE
                     </p>
                     <ul className="text-xs text-espresso/70 space-y-2 font-light">
-                      <li>— Passport & visas</li>
-                      <li>— Comfortable walking shoes</li>
-                      <li>— Light rain jacket</li>
-                      <li>— Power adapter</li>
+                      {packingGuide.map((item, idx) => (
+                        <li key={idx} className="flex items-baseline gap-1.5">
+                          <span className="text-espresso/40">—</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
 
-                  {/* Fellow Travelers */}
+                  {/* Fellow Travelers Chat Widget */}
                   <a
                     href="#"
                     onClick={(e) => e.preventDefault()}
-                    className="bg-white border border-espresso/10 rounded-sm p-5 shadow-sm hover:border-champagne transition flex items-center justify-between group cursor-pointer"
+                    className="bg-white border border-[#E5E0D5] rounded-2xl p-5 shadow-sm hover:border-[#C9A535]/50 transition flex items-center justify-between group cursor-pointer"
                   >
                     <div>
-                      <p className="text-[10px] text-espresso/40 font-bold tracking-[0.2em] mb-1">
+                      <p className="text-[9px] text-[#C9A535] font-bold tracking-[0.2em] mb-1 uppercase">
                         FELLOW TRAVELERS
                       </p>
-                      <p className="text-sm font-semibold text-espresso">Join private group chat</p>
+                      <p className="text-xs md:text-sm font-semibold text-espresso">Join private group chat</p>
                     </div>
-                    <FiArrowRight className="text-espresso/30 group-hover:text-champagne transition" />
+                    <FiArrowRight className="text-espresso/30 group-hover:text-[#C9A535] transition-all transform group-hover:translate-x-1" />
                   </a>
 
-                  {/* Concierge */}
+                  {/* 24/7 Concierge Support Widget */}
                   <a
                     href="#"
                     onClick={(e) => e.preventDefault()}
-                    className="bg-white border border-champagne/45 rounded-sm p-5 shadow-sm hover:border-champagne transition flex items-center justify-between group cursor-pointer"
+                    className="bg-[#FAF6EE] border border-[#C9A535]/30 rounded-2xl p-5 shadow-sm hover:border-[#C9A535] transition flex items-center justify-between group cursor-pointer"
                   >
                     <div>
-                      <p className="text-[10px] text-champagne font-bold tracking-[0.2em] mb-1">
+                      <p className="text-[9px] text-[#C9A535] font-bold tracking-[0.2em] mb-1 uppercase">
                         24/7 CONCIERGE
                       </p>
-                      <p className="text-sm font-semibold text-espresso">Chat with us anytime</p>
+                      <p className="text-xs md:text-sm font-semibold text-espresso">Chat with us anytime</p>
                     </div>
-                    <FiArrowRight className="text-champagne/60 group-hover:text-champagne transition" />
+                    <FiArrowRight className="text-[#C9A535] group-hover:text-[#B48C28] transition-all transform group-hover:translate-x-1" />
                   </a>
+
                 </div>
               </div>
+
             </div>
 
-            {/* All Bookings List */}
-            <div className="border-t border-espresso/10 pt-10">
+            {/* All Bookings List (Lower section) */}
+            <div className="border-t border-espresso/15 pt-12">
               <h3 className="font-serif text-2xl font-bold text-espresso mb-6">
                 All Bookings
               </h3>
@@ -297,44 +362,44 @@ export default function MyBookings() {
                   return (
                     <div
                       key={booking._id}
-                      className="bg-white border border-espresso/10 rounded-sm p-5 hover:border-champagne/50 hover:shadow-md transition"
+                      className="bg-white border border-[#E5E0D5] rounded-2xl p-5 hover:border-[#C9A535]/50 hover:shadow-md transition"
                     >
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-center">
                         <div>
-                          <p className="text-[10px] text-espresso/50 uppercase tracking-widest mb-1">
+                          <p className="text-[9px] text-espresso/45 uppercase tracking-widest mb-1 font-bold">
                             Journey
                           </p>
-                          <p className="font-serif text-base font-bold text-espresso">
+                          <p className="font-serif text-sm font-bold text-espresso">
                             {pkg?.title || "Unknown"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-espresso/50 uppercase tracking-widest mb-1">
+                          <p className="text-[9px] text-espresso/45 uppercase tracking-widest mb-1 font-bold">
                             Destination
                           </p>
-                          <p className="text-espresso/80 text-xs font-light">
+                          <p className="text-espresso/70 text-xs font-light">
                             {pkg?.destination || "N/A"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-espresso/50 uppercase tracking-widest mb-1">
+                          <p className="text-[9px] text-espresso/45 uppercase tracking-widest mb-1 font-bold">
                             Travelers
                           </p>
-                          <p className="text-espresso/80 text-xs font-light">
-                            {booking.quantity}
+                          <p className="text-espresso/70 text-xs font-light">
+                            {booking.quantity} {booking.quantity === 1 ? "Person" : "People"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-espresso/50 uppercase tracking-widest mb-1">
+                          <p className="text-[9px] text-espresso/45 uppercase tracking-widest mb-1 font-bold">
                             Amount
                           </p>
-                          <p className="text-sm font-bold text-espresso">
+                          <p className="text-xs md:text-sm font-bold text-espresso">
                             ₹{booking.totalPrice.toLocaleString()}
                           </p>
                         </div>
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center sm:justify-end">
                           <span
-                            className={`px-3 py-1 rounded-sm text-[9px] font-bold tracking-widest ${
+                            className={`px-2 py-0.5 rounded text-[8px] font-bold tracking-widest uppercase ${
                               booking.status === "confirmed"
                                 ? "bg-olive/15 text-olive"
                                 : booking.status === "pending"
@@ -342,7 +407,7 @@ export default function MyBookings() {
                                   : "bg-red-100 text-red-700"
                             }`}
                           >
-                            {booking.status.toUpperCase()}
+                            {booking.status}
                           </span>
                         </div>
                       </div>
@@ -351,19 +416,20 @@ export default function MyBookings() {
                 })}
               </div>
             </div>
+
           </div>
         ) : (
-          <div className="bg-white border border-espresso/10 rounded-sm p-16 text-center">
-            <FiMapPin size={40} className="mx-auto text-champagne mb-6" />
+          <div className="bg-white border border-[#E5E0D5] rounded-2xl p-16 text-center max-w-xl mx-auto shadow-sm">
+            <FiMapPin size={40} className="mx-auto text-[#C9A535] mb-6" />
             <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mb-3">
               Your adventures await
             </h2>
-            <p className="text-espresso/60 text-base font-light mb-8 max-w-md mx-auto">
+            <p className="text-espresso/60 text-sm md:text-base font-light mb-8 max-w-sm mx-auto leading-relaxed">
               You haven't booked any journeys yet. Explore our curated destinations to start.
             </p>
             <Link
               to="/packages"
-              className="inline-flex items-center gap-2 bg-gradient-to-br from-[#E2C766] to-[#C9A535] text-white font-semibold px-8 py-3.5 rounded-sm hover:opacity-90 hover:shadow-lg transition tracking-wide text-sm"
+              className="inline-flex items-center gap-2 bg-[#1A1A1A] hover:bg-[#2A2A2A] text-white font-semibold px-8 py-3.5 rounded-xl shadow transition tracking-wide text-xs md:text-sm uppercase font-sans"
             >
               Explore Journeys
               <FiArrowRight />

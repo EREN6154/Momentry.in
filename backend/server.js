@@ -45,6 +45,44 @@ const initializeData = async () => {
       console.log("✅ Admin user created");
     }
 
+    // Ensure Boutique Kyoto Escape exists
+    const kyotoExists = await Package.findOne({ title: "Boutique Kyoto Escape" });
+    if (!kyotoExists) {
+      const kyotoPkg = new Package({
+        title: "Boutique Kyoto Escape",
+        destination: "Kyoto, Japan",
+        price: 105000,
+        duration: 7,
+        maxParticipants: 10,
+        description:
+          "A meticulously curated luxury experience in Japan's cultural heart. Wander through bamboo groves, participate in private tea ceremonies, and sleep in premium heritage machiyas.",
+        image:
+          "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&h=500&fit=crop",
+        highlights: [
+          "Heritage machiya residence stay",
+          "Evening welcome matcha ceremony",
+          "Lantern-lit stroll through Gion",
+          "Arashiyama bamboo grove tour",
+          "Private sake tasting cellars",
+          "Farewell luxury onsen retreat",
+        ],
+        itinerary: [
+          { day: 1, title: "Arrival & Gion Twilight Walk", description: "Private airport transfer to your heritage machiya residence. Evening welcome ceremony with matcha tasting, followed by a lantern-lit walk through Gion with your local storyteller. Dinner at a 9-seat kaiseki counter." },
+          { day: 2, title: "Arashiyama Bamboo & Tea Masters", description: "Early morning visit to Arashiyama bamboo path. Private workshop with a 15th-generation tea master, learning the fine art of whisking ceremonial Uji matcha." },
+          { day: 3, title: "Fushimi Inari at Dawn · Sake Cellars", description: "Hike the iconic vermillion torii gates of Fushimi Inari before the crowds arrive. Afternoon tasting flight at a historical sake brewery in the Fushimi district." },
+          { day: 4, title: "Nara's Giants & Uji Matcha", description: "Day excursion to Nara to see the colossal Buddha at Todai-ji and the bowing deer. Stop in Uji, the birthplace of Japanese green tea." },
+          { day: 5, title: "Golden Pavilion & Zen Gardens", description: "Discover the golden Kinkaku-ji reflection. Afternoon meditating at Ryoan-ji's rock garden under the guidance of a resident monk." },
+          { day: 6, title: "Traditional Crafts & Kimono Silk", description: "Visit a master weaver's studio in Nishijin. Spend the afternoon strolling along the Philosopher's Path." },
+          { day: 7, title: "Farewell Onsen Retreat", description: "Conclude your journey at a luxury ryokan on the outskirts of Kyoto, featuring natural hot spring baths and a spectacular multi-course kaiseki dinner." }
+        ],
+        departureDate: new Date("2026-10-12"),
+        bookingEndDate: new Date("2026-09-12"),
+        isActive: true,
+      });
+      await kyotoPkg.save();
+      console.log("✅ Boutique Kyoto Escape package seeded");
+    }
+
     // Create sample packages - only if database is empty
     const packagesCount = await Package.countDocuments();
     if (packagesCount === 0) {

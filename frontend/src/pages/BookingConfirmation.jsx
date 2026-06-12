@@ -47,14 +47,14 @@ export default function BookingConfirmation() {
     };
 
     calculateTime();
-    const timer = setInterval(calculateTime, 60000); // Update every minute is enough and more performant
+    const timer = setInterval(calculateTime, 60000);
 
     return () => clearInterval(timer);
   }, [pkg?.departureDate]);
 
   if (!booking || !pkg) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-alabaster">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5]">
         <p className="font-serif text-2xl text-espresso">
           Loading confirmation...
         </p>
@@ -71,46 +71,48 @@ export default function BookingConfirmation() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F7] py-16 flex items-center justify-center">
+    <div className="min-h-screen bg-[#FAF8F5] py-20 flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-6 text-center w-full">
-        {/* Dashed Checkmark Circle */}
-        <div className="mb-8 flex justify-center">
-          <div className="w-24 h-24 rounded-full border-2 border-dashed border-champagne flex items-center justify-center bg-[#FAF9F7] relative">
-            {/* Minimal Checkmark */}
-            <svg
-              className="w-8 h-8 text-espresso"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+        
+        {/* Double Dashed/Solid Checkmark Circle */}
+        <div className="mb-10 flex justify-center">
+          <div className="w-24 h-24 rounded-full border border-dashed border-[#C9A535] flex items-center justify-center relative">
+            <div className="w-[84px] h-[84px] rounded-full border border-solid border-[#C9A535] bg-[#FAF8F5] flex items-center justify-center">
+              {/* Minimal Checkmark */}
+              <svg
+                className="w-7 h-7 text-espresso stroke-[2.5]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
           </div>
         </div>
 
         {/* Celebration Message */}
-        <h1 className="font-serif text-4xl md:text-5xl font-bold text-espresso mb-4 leading-tight">
+        <h1 className="font-serif text-4xl md:text-5xl text-espresso mb-4 leading-tight">
           Pack your bags, {user?.name?.split(" ")[0] || "traveler"}!
         </h1>
-        <p className="text-lg md:text-xl text-espresso/70 font-light mb-12 max-w-lg mx-auto leading-relaxed">
-          It's official — your curation to <span className="font-medium text-espresso">{pkg.destination}</span> is locked in.
+        <p className="text-base md:text-lg text-espresso/70 font-light mb-12 max-w-lg mx-auto leading-relaxed">
+          It's <i>official</i> — your curation to <span className="font-normal text-espresso">{pkg.destination}</span> is <i>locked in</i>.
         </p>
 
         {/* Split Details Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-xl mx-auto mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-xl mx-auto mb-12">
           {/* Card 1: Booking ID */}
-          <div className="bg-white border border-espresso/10 p-6 rounded-md shadow-sm flex flex-col justify-center items-center">
-            <p className="text-[10px] text-espresso/50 font-bold tracking-[0.2em] mb-3 uppercase">
+          <div className="bg-white border border-[#E5E0D5] p-5 rounded-2xl shadow-sm flex flex-col justify-center items-center h-[96px]">
+            <p className="text-[9px] text-[#C9A535] font-bold tracking-[0.25em] mb-2 uppercase">
               BOOKING ID
             </p>
             <div className="flex items-center gap-3">
-              <span className="font-mono text-xl font-bold text-espresso tracking-wide">
+              <span className="font-mono text-base md:text-lg font-bold text-espresso tracking-wide">
                 {displayBookingId}
               </span>
               <button
                 onClick={handleCopy}
-                className="text-[10px] text-champagne hover:text-espresso font-bold tracking-widest transition uppercase"
+                className="text-[9px] text-espresso/45 hover:text-espresso font-bold tracking-widest transition uppercase border-b border-espresso/25 pb-0.5"
               >
                 {copied ? "COPIED" : "COPY"}
               </button>
@@ -118,11 +120,11 @@ export default function BookingConfirmation() {
           </div>
 
           {/* Card 2: Countdown */}
-          <div className="bg-white border border-espresso/10 p-6 rounded-md shadow-sm flex flex-col justify-center items-center">
-            <p className="text-[10px] text-espresso/50 font-bold tracking-[0.2em] mb-3 uppercase">
+          <div className="bg-white border border-[#E5E0D5] p-5 rounded-2xl shadow-sm flex flex-col justify-center items-center h-[96px]">
+            <p className="text-[9px] text-[#C9A535] font-bold tracking-[0.25em] mb-2 uppercase">
               DEPARTURE COUNTDOWN
             </p>
-            <p className="text-lg font-serif font-bold text-espresso tracking-wide">
+            <p className="text-sm md:text-base font-serif font-bold text-espresso tracking-wide">
               {countdown.days} Days : {String(countdown.hours).padStart(2, "0")} Hrs : {String(countdown.mins).padStart(2, "0")} Min
             </p>
           </div>
@@ -132,14 +134,15 @@ export default function BookingConfirmation() {
         <div className="space-y-4">
           <button
             onClick={() => navigate("/bookings")}
-            className="w-full max-w-xs bg-espresso text-white font-semibold py-4 rounded-sm hover:bg-espresso/90 hover:shadow-lg transition tracking-widest text-sm uppercase font-sans mx-auto block"
+            className="w-full max-w-xs bg-[#1A1A1A] hover:bg-[#2A2A2A] text-white font-semibold py-4 rounded-xl shadow transition duration-200 tracking-wider text-sm font-sans mx-auto block"
           >
             Track My Trip
           </button>
-          <p className="text-xs text-espresso/50 font-light mt-6 max-w-md mx-auto leading-relaxed">
-            A welcome packet & invoice have been dispatched to <span className="font-medium text-espresso">{user?.email}</span>
+          <p className="text-xs text-espresso/55 font-light mt-6 max-w-md mx-auto leading-relaxed">
+            A welcome packet & invoice have been dispatched to <span className="font-normal text-espresso">{user?.email}</span>
           </p>
         </div>
+
       </div>
     </div>
   );

@@ -58,8 +58,12 @@ export default function Admin() {
         ...pkg,
         highlights: pkg.highlights || [],
         itinerary: pkg.itinerary || [],
-        departureDate: pkg.departureDate ? new Date(pkg.departureDate).toISOString().split('T')[0] : "",
-        bookingEndDate: pkg.bookingEndDate ? new Date(pkg.bookingEndDate).toISOString().split('T')[0] : "",
+        departureDate: (pkg.departureDate && !isNaN(new Date(pkg.departureDate).getTime())) 
+          ? new Date(pkg.departureDate).toISOString().split('T')[0] 
+          : "",
+        bookingEndDate: (pkg.bookingEndDate && !isNaN(new Date(pkg.bookingEndDate).getTime())) 
+          ? new Date(pkg.bookingEndDate).toISOString().split('T')[0] 
+          : "",
         difficulty: pkg.difficulty || "Moderate",
         leadGuide: pkg.leadGuide || "",
       });
@@ -416,17 +420,22 @@ export default function Admin() {
                         const initials = b.userId?.name 
                           ? b.userId.name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) 
                           : "TR";
-                        const formattedAmount = `₹${b.totalPrice.toLocaleString("en-IN")}`;
+                        const formattedAmount = b.totalPrice !== undefined && b.totalPrice !== null
+                          ? `₹${b.totalPrice.toLocaleString("en-IN")}`
+                          : "₹0";
                         const statusColor = b.status === "confirmed" 
                           ? "bg-olive/10 text-olive border-olive/20" 
                           : b.status === "pending"
                             ? "bg-[#F7F3EC] text-[#C9A535] border-[#C9A535]/20"
                             : "bg-red-50 text-red-700 border-red-200";
+                        const displayStatus = b.status 
+                          ? (b.status.toUpperCase() === "CONFIRMED" ? "PAID" : b.status.toUpperCase()) 
+                          : "PENDING";
                         return {
                           name: b.userId?.name || "Traveler",
                           dest: b.packageId?.destination || "Destination",
                           amount: formattedAmount,
-                          status: b.status.toUpperCase() === "CONFIRMED" ? "PAID" : b.status.toUpperCase(),
+                          status: displayStatus,
                           initials,
                           color: statusColor
                         };
@@ -509,7 +518,7 @@ export default function Admin() {
                         {pkg.destination}
                       </td>
                       <td className="px-6 py-4 text-espresso">
-                        ₹{pkg.price.toLocaleString()}
+                        ₹{pkg.price !== undefined && pkg.price !== null ? pkg.price.toLocaleString() : "0"}
                       </td>
                       <td className="px-6 py-4 text-espresso/60 font-light">
                         {pkg.duration} days

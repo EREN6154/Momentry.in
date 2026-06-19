@@ -14,6 +14,7 @@ import PackageDetail from "./pages/PackageDetail";
 import Payment from "./pages/Payment";
 import MyBookings from "./pages/MyBookings";
 import BookingConfirmation from "./pages/BookingConfirmation";
+import NotFound from "./pages/NotFound";
 import "./styles/global.css";
 
 function App() {
@@ -83,6 +84,7 @@ function App() {
                 </AdminRoute>
               }
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
       </BrowserRouter>

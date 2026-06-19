@@ -136,3 +136,16 @@ export const getAdminDashboardStats = async (req, res) => {
   }
 };
 
+export const getAllBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate("userId", "name email phone")
+      .populate("packageId", "title destination price duration departureDate")
+      .sort({ createdAt: -1 });
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+

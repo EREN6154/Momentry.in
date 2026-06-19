@@ -186,6 +186,8 @@ export const useBookingStore = create((set) => ({
   bookings: [],
   currentBooking: null,
   adminStats: null,
+  adminBookings: [],
+  adminPayments: [],
 
   createBooking: async (packageId, quantity) => {
     try {
@@ -227,6 +229,58 @@ export const useBookingStore = create((set) => ({
       return response.data;
     } catch (error) {
       console.error("Failed to fetch admin stats:", error);
+    }
+  },
+
+  fetchAdminBookings: async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${API_URL}/bookings/admin/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      set({ adminBookings: response.data });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch admin bookings:", error);
+    }
+  },
+
+  updateAdminBookingStatus: async (bookingId, status) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.put(
+        `${API_URL}/bookings/${bookingId}`,
+        { status },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      set((state) => {
+        const updatedAdminBookings = state.adminBookings.map((b) =>
+          b._id === bookingId ? { ...b, status: response.data.status } : b
+        );
+        const updatedBookings = state.bookings.map((b) =>
+          b._id === bookingId ? { ...b, status: response.data.status } : b
+        );
+        return { adminBookings: updatedAdminBookings, bookings: updatedBookings };
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error("Failed to update booking status:", error);
+      return { success: false, error: error.response?.data?.message };
+    }
+  },
+
+  fetchAdminPayments: async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${API_URL}/payments/admin/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      set({ adminPayments: response.data });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch admin payments:", error);
     }
   },
 }));

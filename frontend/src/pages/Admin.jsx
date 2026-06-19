@@ -20,7 +20,15 @@ export default function Admin() {
   const { packages, fetchPackages, addPackage, updatePackage, deletePackage } =
     usePackageStore();
   const { user, logout } = useAuthStore();
-  const { adminStats, fetchAdminStats } = useBookingStore();
+  const {
+    adminStats,
+    fetchAdminStats,
+    adminBookings,
+    fetchAdminBookings,
+    updateAdminBookingStatus,
+    adminPayments,
+    fetchAdminPayments,
+  } = useBookingStore();
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -45,9 +53,17 @@ export default function Admin() {
   const [itineraryInput, setItineraryInput] = useState({ title: "", description: "" });
   const [loading, setLoading] = useState(false);
 
+  // Search & Filter States
+  const [bookingSearch, setBookingSearch] = useState("");
+  const [bookingStatusFilter, setBookingStatusFilter] = useState("all");
+  const [paymentSearch, setPaymentSearch] = useState("");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
+
   useEffect(() => {
     fetchPackages();
     fetchAdminStats();
+    fetchAdminBookings();
+    fetchAdminPayments();
   }, []);
 
   const handleOpenModal = (pkg = null) => {
@@ -211,15 +227,61 @@ export default function Admin() {
   const activeTrips = packages?.filter((p) => p.isActive).length || 0;
   const totalTrips = packages?.length || 0;
 
+  const filteredBookings = adminBookings?.filter((booking) => {
+    const searchLower = bookingSearch.toLowerCase();
+    const customerName = booking.userId?.name?.toLowerCase() || "";
+    const customerEmail = booking.userId?.email?.toLowerCase() || "";
+    const tripTitle = booking.packageId?.title?.toLowerCase() || "";
+    const tripDest = booking.packageId?.destination?.toLowerCase() || "";
+    const bookingId = booking._id?.toLowerCase() || "";
+
+    const matchesSearch =
+      customerName.includes(searchLower) ||
+      customerEmail.includes(searchLower) ||
+      tripTitle.includes(searchLower) ||
+      tripDest.includes(searchLower) ||
+      bookingId.includes(searchLower);
+
+    const matchesStatus =
+      bookingStatusFilter === "all" || booking.status === bookingStatusFilter;
+
+    return matchesSearch && matchesStatus;
+  }) || [];
+
+  const filteredPayments = adminPayments?.filter((payment) => {
+    const searchLower = paymentSearch.toLowerCase();
+    const customerName = payment.userId?.name?.toLowerCase() || "";
+    const customerEmail = payment.userId?.email?.toLowerCase() || "";
+    const orderId = payment.razorpayOrderId?.toLowerCase() || "";
+    const paymentId = payment.razorpayPaymentId?.toLowerCase() || "";
+    const id = payment._id?.toLowerCase() || "";
+
+    const matchesSearch =
+      customerName.includes(searchLower) ||
+      customerEmail.includes(searchLower) ||
+      orderId.includes(searchLower) ||
+      paymentId.includes(searchLower) ||
+      id.includes(searchLower);
+
+    const matchesStatus =
+      paymentStatusFilter === "all" || payment.status === paymentStatusFilter;
+
+    return matchesSearch && matchesStatus;
+  }) || [];
+
+  const completedPayments = adminPayments?.filter(p => p.status === "completed") || [];
+  const totalCompletedRevenue = completedPayments.reduce((sum, p) => sum + p.amount, 0);
+  const pendingPayments = adminPayments?.filter(p => p.status === "pending") || [];
+  const totalPendingVolume = pendingPayments.reduce((sum, p) => sum + p.amount, 0);
+
   const menuItems = [
     { id: "dashboard", icon: FiGrid, label: "Dashboard Overview" },
     { id: "trips", icon: FiBriefcase, label: "Manage Trips" },
-    { id: "users", icon: FiUsers, label: "Users & Bookings", soon: true },
+    { id: "users", icon: FiUsers, label: "Users & Bookings" },
     {
       id: "financials",
       icon: FiCreditCard,
       label: "Financials (Razorpay)",
-      soon: true,
     },
     { id: "cms", icon: FiEdit3, label: "Content Manager", soon: true },
     { id: "reviews", icon: FiStar, label: "Review Moderation", soon: true },
@@ -575,6 +637,347 @@ export default function Admin() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Users & Bookings Table (Only on activeMenu === "users") */}
+        {activeMenu === "users" && (
+          <div className="bg-white border border-espresso/10 rounded-sm overflow-hidden p-6 shadow-sm animate-fade-in">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-espresso/10 pb-4">
+              <div>
+                <h2 className="font-serif text-2xl font-bold text-espresso">
+                  Users & Bookings
+                </h2>
+                <p className="text-espresso/50 text-xs font-light mt-1">
+                  Manage traveler slots, schedules, and custom booking statuses.
+                </p>
+              </div>
+              <div className="text-sm font-semibold text-espresso bg-alabaster px-4 py-2 border border-espresso/5 rounded-sm">
+                Total Bookings: {adminBookings?.length || 0}
+              </div>
+            </div>
+
+            {/* Filter Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div className="sm:col-span-2">
+                <input
+                  type="text"
+                  placeholder="Search by customer name, email, package or booking ID..."
+                  value={bookingSearch}
+                  onChange={(e) => setBookingSearch(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-espresso/20 rounded-sm focus:outline-none focus:border-champagne text-espresso text-sm bg-white"
+                />
+              </div>
+              <div>
+                <select
+                  value={bookingStatusFilter}
+                  onChange={(e) => setBookingStatusFilter(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-espresso/20 rounded-sm focus:outline-none focus:border-champagne text-espresso text-sm bg-white"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed / Paid</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Bookings Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-alabaster border-b border-espresso/10">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                      TRAVELER
+                    </th>
+                    <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                      TRIP DETAILS
+                    </th>
+                    <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                      SLOTS
+                    </th>
+                    <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                      TOTAL PRICE
+                    </th>
+                    <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                      BOOKED ON
+                    </th>
+                    <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                      STATUS
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-espresso/5">
+                  {filteredBookings.map((booking) => {
+                    const travelerName = booking.userId?.name || "Anonymous Traveler";
+                    const travelerEmail = booking.userId?.email || "N/A";
+                    const travelerPhone = booking.userId?.phone || "No phone";
+                    const tripTitle = booking.packageId?.title || "Deleted Package";
+                    const tripDest = booking.packageId?.destination || "N/A";
+                    const departure = booking.packageId?.departureDate
+                      ? new Date(booking.packageId.departureDate).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "TBD";
+
+                    const statusColors = {
+                      confirmed: "bg-olive/10 text-olive border-olive/20",
+                      pending: "bg-[#F7F3EC] text-[#C9A535] border-[#C9A535]/20",
+                      cancelled: "bg-red-50 text-red-700 border-red-200",
+                    };
+
+                    const statusClass = statusColors[booking.status] || "bg-gray-50 text-gray-700 border-gray-200";
+
+                    return (
+                      <tr key={booking._id} className="hover:bg-alabaster/40 transition">
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-semibold text-espresso">{travelerName}</p>
+                          <p className="text-xs text-espresso/60 font-light">{travelerEmail}</p>
+                          <p className="text-[10px] text-espresso/40 font-mono mt-0.5">{travelerPhone}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-semibold text-espresso">{tripTitle}</p>
+                          <p className="text-xs text-espresso/60 font-light">{tripDest}</p>
+                          <p className="text-[10px] text-champagne font-semibold tracking-wider mt-1 uppercase">
+                            Dept: {departure}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-espresso/70 font-semibold font-mono">
+                          {booking.quantity}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-espresso font-bold font-mono">
+                          ₹{booking.totalPrice?.toLocaleString("en-IN") || 0}
+                        </td>
+                        <td className="px-6 py-4 text-xs text-espresso/50 font-light">
+                          {new Date(booking.createdAt).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-2">
+                            <span className={`inline-block text-center px-2 py-1 rounded-sm text-[9px] font-bold tracking-widest border ${statusClass}`}>
+                              {booking.status?.toUpperCase()}
+                            </span>
+                            <select
+                              value={booking.status}
+                              onChange={async (e) => {
+                                const confirmChange = window.confirm(
+                                  `Are you sure you want to change this booking status to "${e.target.value}"?`
+                                );
+                                if (confirmChange) {
+                                  const res = await updateAdminBookingStatus(booking._id, e.target.value);
+                                  if (res?.success) {
+                                    fetchAdminStats();
+                                  } else {
+                                    alert(res?.error || "Failed to update status");
+                                  }
+                                }
+                              }}
+                              className="px-2 py-1 border border-espresso/15 rounded-sm bg-white text-[10px] font-semibold text-espresso focus:outline-none focus:border-champagne"
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="confirmed">Confirmed</option>
+                              <option value="cancelled">Cancelled</option>
+                            </select>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {filteredBookings.length === 0 && (
+              <div className="text-center py-12 text-espresso/60 italic font-light text-sm">
+                No bookings match your current filter criteria.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Financials (Razorpay) Table (Only on activeMenu === "financials") */}
+        {activeMenu === "financials" && (
+          <div className="space-y-6 animate-fade-in">
+            {/* KPI Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white border border-espresso/10 rounded-sm p-6 shadow-sm">
+                <p className="text-[10px] text-espresso/50 font-bold tracking-[0.2em] mb-2 uppercase">
+                  Total Captured Revenue
+                </p>
+                <p className="font-serif text-3xl font-bold text-espresso mb-1">
+                  ₹{totalCompletedRevenue?.toLocaleString("en-IN") || "0"}
+                </p>
+                <p className="text-xs text-olive font-light">
+                  {completedPayments.length} successful transactions
+                </p>
+              </div>
+              <div className="bg-white border border-espresso/10 rounded-sm p-6 shadow-sm">
+                <p className="text-[10px] text-espresso/50 font-bold tracking-[0.2em] mb-2 uppercase">
+                  Pending Volume
+                </p>
+                <p className="font-serif text-3xl font-bold text-espresso mb-1">
+                  ₹{totalPendingVolume?.toLocaleString("en-IN") || "0"}
+                </p>
+                <p className="text-xs text-[#C9A535] font-light">
+                  {pendingPayments.length} open payment order links
+                </p>
+              </div>
+              <div className="bg-white border border-espresso/10 rounded-sm p-6 shadow-sm">
+                <p className="text-[10px] text-espresso/50 font-bold tracking-[0.2em] mb-2 uppercase">
+                  Total Logged Attempts
+                </p>
+                <p className="font-serif text-3xl font-bold text-espresso mb-1">
+                  {adminPayments?.length || 0}
+                </p>
+                <p className="text-xs text-espresso/50 font-light">
+                  Includes test captures & checkout sessions
+                </p>
+              </div>
+            </div>
+
+            {/* Main Financials Card */}
+            <div className="bg-white border border-espresso/10 rounded-sm overflow-hidden p-6 shadow-sm">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-espresso/10 pb-4">
+                <div>
+                  <h2 className="font-serif text-2xl font-bold text-espresso">
+                    Razorpay Transactions Log
+                  </h2>
+                  <p className="text-espresso/50 text-xs font-light mt-1">
+                    Audit log of payments created, verified, and signature checked.
+                  </p>
+                </div>
+              </div>
+
+              {/* Filter Bar */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div className="sm:col-span-2">
+                  <input
+                    type="text"
+                    placeholder="Search by customer name, email, Razorpay Order ID, or Transaction ID..."
+                    value={paymentSearch}
+                    onChange={(e) => setPaymentSearch(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-espresso/20 rounded-sm focus:outline-none focus:border-champagne text-espresso text-sm bg-white"
+                  />
+                </div>
+                <div>
+                  <select
+                    value={paymentStatusFilter}
+                    onChange={(e) => setPaymentStatusFilter(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-espresso/20 rounded-sm focus:outline-none focus:border-champagne text-espresso text-sm bg-white"
+                  >
+                    <option value="all">All Payment Statuses</option>
+                    <option value="completed">Completed / Captured</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Payments Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-alabaster border-b border-espresso/10">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                        PAYMENT LOG ID / DATE
+                      </th>
+                      <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                        CUSTOMER
+                      </th>
+                      <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                        TRIP REFERENCE
+                      </th>
+                      <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                        RAZORPAY GATEWAY DETAILS
+                      </th>
+                      <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                        AMOUNT
+                      </th>
+                      <th className="px-6 py-3 text-left text-[11px] font-bold text-espresso/60 tracking-widest">
+                        STATUS
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-espresso/5">
+                    {filteredPayments.map((payment) => {
+                      const customerName = payment.userId?.name || "Deleted User";
+                      const customerEmail = payment.userId?.email || "N/A";
+                      const tripTitle = payment.bookingId?.packageId?.title || "Unknown Trip";
+                      const tripDest = payment.bookingId?.packageId?.destination || "N/A";
+                      const bookingId = payment.bookingId?._id || "No Booking ID";
+
+                      const statusColors = {
+                        completed: "bg-olive/10 text-olive border-olive/20",
+                        pending: "bg-[#F7F3EC] text-[#C9A535] border-[#C9A535]/20",
+                        failed: "bg-red-50 text-red-700 border-red-200",
+                      };
+
+                      const statusClass = statusColors[payment.status] || "bg-gray-50 text-gray-700 border-gray-200";
+
+                      return (
+                        <tr key={payment._id} className="hover:bg-alabaster/40 transition">
+                          <td className="px-6 py-4">
+                            <p className="text-xs font-semibold text-espresso font-mono">{payment._id}</p>
+                            <p className="text-[10px] text-espresso/50 mt-1">
+                              {new Date(payment.createdAt).toLocaleString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-sm font-semibold text-espresso">{customerName}</p>
+                            <p className="text-xs text-espresso/60 font-light">{customerEmail}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-sm font-semibold text-espresso">{tripTitle}</p>
+                            <p className="text-xs text-espresso/60 font-light">{tripDest}</p>
+                            <p className="text-[10px] text-espresso/40 font-mono mt-1">
+                              Booking Ref: {bookingId}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-xs text-espresso font-mono">
+                              <span className="text-espresso/50 font-sans font-light">Order ID:</span>{" "}
+                              {payment.razorpayOrderId || "N/A"}
+                            </p>
+                            {payment.razorpayPaymentId && (
+                              <p className="text-xs text-espresso font-mono mt-1">
+                                <span className="text-espresso/50 font-sans font-light">Pay ID:</span>{" "}
+                                {payment.razorpayPaymentId}
+                              </p>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-espresso font-bold font-mono">
+                            ₹{payment.amount?.toLocaleString("en-IN") || 0}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-block text-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest border ${statusClass}`}>
+                              {payment.status?.toUpperCase()}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {filteredPayments.length === 0 && (
+                <div className="text-center py-12 text-espresso/60 italic font-light text-sm">
+                  No payment attempts match your search and filter criteria.
+                </div>
+              )}
+            </div>
           </div>
         )}
       </main>

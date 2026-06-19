@@ -98,3 +98,22 @@ export const getPaymentStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getAllPayments = async (req, res) => {
+  try {
+    const payments = await Payment.find()
+      .populate("userId", "name email")
+      .populate({
+        path: "bookingId",
+        populate: {
+          path: "packageId",
+          select: "title destination",
+        },
+      })
+      .sort({ createdAt: -1 });
+    res.json(payments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

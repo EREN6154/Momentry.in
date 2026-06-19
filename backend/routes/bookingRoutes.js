@@ -5,6 +5,7 @@ import {
   getBookingById,
   updateBooking,
   getAdminDashboardStats,
+  getAllBookings,
 } from "../controllers/bookingController.js";
 import { verifyToken, adminOnly } from "../middleware/auth.js";
 
@@ -13,6 +14,7 @@ const router = express.Router();
 router.post("/", verifyToken, createBooking);
 router.get("/", verifyToken, getUserBookings);
 router.get("/admin/dashboard", verifyToken, adminOnly, getAdminDashboardStats);
+router.get("/admin/all", verifyToken, adminOnly, getAllBookings);
 router.get("/:id", verifyToken, getBookingById);
 router.put("/:id", verifyToken, updateBooking);
 

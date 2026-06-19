@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
 import Header from "./Header";
@@ -29,8 +29,8 @@ describe("Header Component", () => {
 
     expect(screen.getByText("MOMENTRY")).toBeInTheDocument();
     expect(screen.getByText("Travel Adventures")).toBeInTheDocument();
-    expect(screen.getAllByText("Home")[0]).toBeInTheDocument();
-    expect(screen.getAllByText("Packages")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Trips")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("About Us")[0]).toBeInTheDocument();
   });
 
   it("renders Login and Sign Up links when the user is not authenticated", () => {
@@ -42,12 +42,11 @@ describe("Header Component", () => {
 
     expect(screen.getAllByText("Login")[0]).toBeInTheDocument();
     expect(screen.getAllByText("Sign Up")[0]).toBeInTheDocument();
-    expect(screen.queryByText("Welcome,")).not.toBeInTheDocument();
-    expect(screen.queryByText("My Bookings")).not.toBeInTheDocument();
+    expect(screen.queryByText("My Journeys")).not.toBeInTheDocument();
     expect(screen.queryByText("Admin Panel")).not.toBeInTheDocument();
   });
 
-  it("renders welcome message, bookings link, and logout button when user is logged in", () => {
+  it("renders user avatar and dropdown items when user is logged in", () => {
     // Set user state
     useAuthStore.setState({
       user: { name: "Ayush Soni", email: "ayush@example.com" },
@@ -61,8 +60,16 @@ describe("Header Component", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Welcome, Ayush Soni")).toBeInTheDocument();
-    expect(screen.getAllByText("My Bookings")[0]).toBeInTheDocument();
+    // Initial avatar with initials AS should be present
+    const avatarButton = screen.getByText("AS");
+    expect(avatarButton).toBeInTheDocument();
+
+    // Click avatar button to open profile dropdown
+    fireEvent.click(avatarButton);
+
+    // Now, dropdown items should be visible
+    expect(screen.getByText("Ayush Soni")).toBeInTheDocument();
+    expect(screen.getAllByText("My Journeys")[0]).toBeInTheDocument();
     expect(screen.getAllByText("Logout")[0]).toBeInTheDocument();
     
     // Links for anonymous users should not be visible
@@ -85,9 +92,15 @@ describe("Header Component", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Welcome, Admin User")).toBeInTheDocument();
-    expect(screen.getAllByText("My Bookings")[0]).toBeInTheDocument();
+    const avatarButton = screen.getByText("AU");
+    expect(avatarButton).toBeInTheDocument();
+
+    // Click avatar button to open profile dropdown
+    fireEvent.click(avatarButton);
+
+    expect(screen.getByText("Admin User")).toBeInTheDocument();
     expect(screen.getAllByText("Admin Panel")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("My Journeys")[0]).toBeInTheDocument();
     expect(screen.getAllByText("Logout")[0]).toBeInTheDocument();
   });
 });
